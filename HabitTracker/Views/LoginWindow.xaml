@@ -1,0 +1,42 @@
+﻿<Window x:Class="HabitTracker.Views.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Авторизация" Height="400" Width="400" WindowStartupLocation="CenterScreen"
+        Background="#f4f5f7">
+    <Grid Margin="20">
+        <TabControl VerticalAlignment="Center" Background="White">
+
+            <!-- ВКЛАДКА ВХОДА -->
+            <TabItem Header="Вход" FontSize="14">
+                <StackPanel Margin="20">
+                    <TextBlock Text="Email:" Margin="0,10,0,5"/>
+                    <TextBox x:Name="TxtLoginEmail" Height="30" VerticalContentAlignment="Center"/>
+
+                    <TextBlock Text="Пароль:" Margin="0,10,0,5"/>
+                    <PasswordBox x:Name="TxtLoginPassword" Height="30" VerticalContentAlignment="Center"/>
+
+                    <Button Content="Войти" Height="40" Margin="0,20,0,0" Click="BtnLogin_Click" 
+                            Background="#0078D7" Foreground="White" FontWeight="Bold" BorderThickness="0"/>
+                </StackPanel>
+            </TabItem>
+
+            <!-- ВКЛАДКА РЕГИСТРАЦИИ -->
+            <TabItem Header="Регистрация" FontSize="14">
+                <StackPanel Margin="20">
+                    <TextBlock Text="Имя пользователя:" Margin="0,10,0,5"/>
+                    <TextBox x:Name="TxtRegUsername" Height="30" VerticalContentAlignment="Center"/>
+
+                    <TextBlock Text="Email:" Margin="0,10,0,5"/>
+                    <TextBox x:Name="TxtRegEmail" Height="30" VerticalContentAlignment="Center"/>
+
+                    <TextBlock Text="Пароль:" Margin="0,10,0,5"/>
+                    <PasswordBox x:Name="TxtRegPassword" Height="30" VerticalContentAlignment="Center"/>
+
+                    <Button Content="Зарегистрироваться" Height="40" Margin="0,20,0,0" Click="BtnRegister_Click" 
+                            Background="#28a745" Foreground="White" FontWeight="Bold" BorderThickness="0"/>
+                </StackPanel>
+            </TabItem>
+
+        </TabControl>
+    </Grid>
+</Window>

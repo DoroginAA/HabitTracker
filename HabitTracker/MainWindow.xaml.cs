@@ -1,56 +1,103 @@
 ﻿using System;
+using System.Linq;
 using System.Windows;
 using HabitTracker.Data;
 using HabitTracker.Models;
+using System.Windows.Controls;
 
 namespace HabitTracker
 {
     public partial class MainWindow : Window
     {
-        public MainWindow()
+        private long _currentUserId;
+
+        public MainWindow(long userId)
         {
             InitializeComponent();
-
-            // Инициализируем БД при запуске окна
-            InitializeDatabase();
+            _currentUserId = userId;
         }
 
-        /// <summary>
-        /// Метод для создания базы данных и заполнения справочников.
-        /// </summary>
-        private void InitializeDatabase()
+        private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            LoadHabits();
+        }
+
+        private void LoadHabits()
+        {
+            using (var context = new AppDbContext())
+            {
+                // Загружаем привычки текущего пользователя
+                var habits = context.Habits.Where(h => h.UserId == _currentUserId).ToList();
+                HabitsListBox.ItemsSource = habits;
+            }
+        }
+
+        private void BtnAdd_Click(object sender, RoutedEventArgs e)
+        {
+            string habitName = TxtHabitName.Text.Trim();
+
+            if (string.IsNullOrWhiteSpace(habitName))
+            {
+                MessageBox.Show("Введите название!", "Внимание");
+                return;
+            }
+
             try
             {
                 using (var context = new AppDbContext())
                 {
-                    // Создаем БД, если её нет
-                    if (context.Database.EnsureCreated())
+                    var newHabit = new Habit
                     {
-                        // Если БД создана только что, заполняем справочники
-                        context.HabitTypes.AddRange(
-                            new HabitType { Code = "GOOD", Name = "Полезная" },
-                            new HabitType { Code = "BAD", Name = "Вредная" }
-                        );
+                        Name = habitName,
+                        UserId = _currentUserId,
+                        HabitTypeId = 1,
+                        StatusId = 1,
+                        FrequencyTypeId = 1,
+                        StartDate = DateTime.Now
+                    };
 
-                        context.HabitStatuses.AddRange(
-                            new HabitStatus { Code = "ACTIVE", Name = "Активная" },
-                            new HabitStatus { Code = "ARCHIVED", Name = "В архиве" }
-                        );
-
-                        context.FrequencyTypes.AddRange(
-                            new FrequencyType { Code = "DAILY", Name = "Ежедневно" },
-                            new FrequencyType { Code = "WEEKLY", Name = "Еженедельно" }
-                        );
-
-                        context.SaveChanges();
-                    }
+                    context.Habits.Add(newHabit);
+                    context.SaveChanges();
                 }
+
+                TxtHabitName.Text = string.Empty;
+                LoadHabits();
             }
             catch (Exception ex)
             {
-                // Если произошла ошибка, показываем её на экране
-                MessageBox.Show($"Ошибка при инициализации БД: {ex.Message}\n Внутренняя ошибка: {ex.InnerException?.Message}", "Критическая ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Ошибка: {ex.Message}");
+            }
+        }
+
+        // ОБРАБОТЧИК УДАЛЕНИЯ
+        private void BtnDelete_Click(object sender, RoutedEventArgs e)
+        {
+            // Получаем ID привычки из Tag кнопки, на которую нажали
+            if (sender is Button button && button.Tag is long habitId)
+            {
+                var result = MessageBox.Show("Вы уверены, что хотите удалить эту привычку?",
+                                             "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        using (var context = new AppDbContext())
+                        {
+                            var habit = context.Habits.FirstOrDefault(h => h.HabitId == habitId);
+                            if (habit != null)
+                            {
+                                context.Habits.Remove(habit);
+                                context.SaveChanges();
+                            }
+                        }
+                        LoadHabits(); // Обновляем список
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Ошибка при удалении: {ex.Message}");
+                    }
+                }
             }
         }
     }
