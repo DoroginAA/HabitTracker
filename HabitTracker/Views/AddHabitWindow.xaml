@@ -1,0 +1,50 @@
+﻿<Window x:Class="HabitTracker.Views.AddHabitWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Создание привычки" Height="450" Width="400" 
+        WindowStartupLocation="CenterOwner" Background="#f4f5f7">
+    <Grid Margin="20">
+        <StackPanel>
+            <TextBlock Text="Название:" Margin="0,0,0,5"/>
+            <TextBox x:Name="TxtName" Height="30" VerticalContentAlignment="Center" Margin="0,0,0,15"/>
+
+            <TextBlock Text="Категория:" Margin="0,0,0,5"/>
+            <ComboBox x:Name="CmbCategory" Height="30" Margin="0,0,0,15">
+                <ComboBoxItem Content="Здоровье" IsSelected="True"/>
+                <ComboBoxItem Content="Спорт"/>
+                <ComboBoxItem Content="Работа"/>
+                <ComboBoxItem Content="Обучение"/>
+            </ComboBox>
+
+            <TextBlock Text="Периодичность:" Margin="0,0,0,5"/>
+            <ComboBox x:Name="CmbFrequency" Height="30" Margin="0,0,0,15">
+                <ComboBoxItem Content="Ежедневно" IsSelected="True"/>
+                <ComboBoxItem Content="Еженедельно"/>
+            </ComboBox>
+
+            <TextBlock Text="Тип привычки:" Margin="0,0,0,5"/>
+            <ComboBox x:Name="CmbType" Height="30" Margin="0,0,0,15">
+                <ComboBoxItem Content="Полезная" IsSelected="True"/>
+                <ComboBoxItem Content="Вредная"/>
+            </ComboBox>
+
+            <Grid Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Целевое значение:" Margin="0,0,0,5"/>
+                    <TextBox x:Name="TxtTarget" Height="30" VerticalContentAlignment="Center"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="Ед. измерения:" Margin="0,0,0,5"/>
+                    <TextBox x:Name="TxtUnit" Height="30" VerticalContentAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+
+            <Button Content="Сохранить" Height="40" Background="#28a745" Foreground="White" FontWeight="Bold" BorderThickness="0" Click="BtnSave_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

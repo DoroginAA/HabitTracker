@@ -21,7 +21,7 @@ namespace HabitTracker.Views
             InitializeComponent();
         }
 
-        // ЛОГИКА ВХОДА
+        // Вход
         private void BtnLogin_Click(object sender, RoutedEventArgs e)
         {
             string email = TxtLoginEmail.Text.Trim();
@@ -35,6 +35,8 @@ namespace HabitTracker.Views
 
             try
             {
+                string username = "";
+                string useremail = "";
                 using (var context = new AppDbContext())
                 {
                     // Ищем пользователя
@@ -48,9 +50,11 @@ namespace HabitTracker.Views
                     }
 
                     LoggedInUserId = user.UserId;
+                    username = user.Username;
+                    useremail = user.Email;
                 }
 
-                OpenMainWindow();
+                OpenMainWindow(username, useremail);
             }
             catch (Exception ex)
             {
@@ -58,7 +62,7 @@ namespace HabitTracker.Views
             }
         }
 
-        // ЛОГИКА РЕГИСТРАЦИИ
+        // Регистрация
         private void BtnRegister_Click(object sender, RoutedEventArgs e)
         {
             string username = TxtRegUsername.Text.Trim();
@@ -89,7 +93,6 @@ namespace HabitTracker.Views
                         Email = email,
                         PasswordHash = PasswordHasher.Hash(password) // Хешируем!
                     };
-
                     context.Users.Add(newUser);
                     context.SaveChanges();
 
@@ -98,6 +101,8 @@ namespace HabitTracker.Views
                     // Очищаем поля и перекидываем на вкладку входа
                     TxtRegUsername.Text = ""; TxtRegEmail.Text = ""; TxtRegPassword.Password = "";
                     TxtLoginEmail.Text = email; TxtLoginPassword.Focus();
+                    LoggedInUserId = newUser.UserId;
+                    OpenMainWindow(newUser.Username, newUser.Email);
                 }
             }
             catch (Exception ex)
@@ -106,9 +111,9 @@ namespace HabitTracker.Views
             }
         }
 
-        private void OpenMainWindow()
+        private void OpenMainWindow(string username, string email)
         {
-            var mainWindow = new MainWindow(LoggedInUserId);
+            var mainWindow = new MainWindow(LoggedInUserId, username, email);
             mainWindow.Show();
             this.Close();
         }
