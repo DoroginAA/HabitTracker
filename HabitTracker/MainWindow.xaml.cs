@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -18,6 +19,8 @@ namespace HabitTracker
         private string _currentEmail;
         private bool _isDarkTheme = false;
 
+        private UserSetting _currentSettings;
+
         // Списки для хранения карточек (активные и архивные)
         private List<Border> _activeHabitCards = new List<Border>();
         private List<Border> _archivedHabitCards = new List<Border>();
@@ -33,7 +36,182 @@ namespace HabitTracker
             TxtProfileName.Text = _currentUsername;
             TxtProfileEmail.Text = $"Email: {_currentEmail}";
 
+            using (var context = new AppDbContext())
+            {
+                _currentSettings = context.UserSettings.FirstOrDefault(s => s.UserId == _currentUserId);
+
+                // Если настроек нет, создаем их
+                if (_currentSettings == null)
+                {
+                    _currentSettings = new UserSetting { UserId = _currentUserId, Theme = "Light" };
+                    context.UserSettings.Add(_currentSettings);
+                    context.SaveChanges();
+                }
+            }
+
+            if (!string.IsNullOrEmpty(_currentSettings.AvatarPath))
+            {
+                string fullPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, _currentSettings.AvatarPath);
+
+                if (File.Exists(fullPath))
+                {
+                    try
+                    {
+                        BitmapImage bitmap = new BitmapImage();
+                        bitmap.BeginInit();
+                        bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                        bitmap.UriSource = new Uri(fullPath);
+                        bitmap.EndInit();
+                        bitmap.Freeze();
+
+                        ImgAvatar.Source = bitmap;
+                        ImgProfileAvatar.Source = bitmap;
+                    }
+                    catch {  }
+                }
+            }
+
             LoadMockHabits();
+
+            bool isDark = _currentSettings.Theme == "Dark";
+            ChkDarkTheme.IsChecked = isDark;
+            ApplyTheme(isDark);
+        }
+
+        private void ApplyTheme(bool isDark)
+        {
+            _isDarkTheme = isDark;
+
+            Brush bgDark = new SolidColorBrush(Color.FromRgb(30, 30, 30));
+            Brush panelDark = new SolidColorBrush(Color.FromRgb(45, 45, 45));
+            Brush textDark = Brushes.White;
+            Brush textLight = Brushes.Black;
+            Brush panelLight = Brushes.White;
+
+            if (isDark)
+            {
+                this.Background = bgDark;
+                LeftSidebar.Background = new SolidColorBrush(Color.FromRgb(20, 20, 20));
+                MainTabControl.Background = bgDark;
+
+                // Панели
+                TopControlPanel.Background = panelDark;
+                ArchiveHeader.Background = panelDark;
+                SettingsBorder.Background = panelDark;
+                AboutBorder.Background = panelDark;
+                ProfileBorder.Background = panelDark;
+                StatBorder1.Background = panelDark;
+                StatBorder2.Background = panelDark;
+                StatBorder3.Background = panelDark;
+                ChartBorder.Background = panelDark;
+
+                // Текст профиля и меню
+                TxtProfileHeader.Foreground = textDark;
+                TxtProfileName.Foreground = textDark;
+                TxtUsername.Foreground = textDark;
+
+                // Текст фильтра
+                TxtFilterLabel.Foreground = textDark;
+                CmbFilter.Foreground = textDark;
+                CmbFilter.Background = panelDark;
+
+                // Текст в Настройках и О программе (ИСПРАВЛЕНИЕ)
+                TxtSettingsTitle.Foreground = textDark;
+                ChkReminders.Foreground = textDark;
+                ChkDarkTheme.Foreground = textDark;
+                TxtExportTitle.Foreground = textDark;
+
+                TxtAboutTitle.Foreground = textDark;
+                TxtAboutDesc.Foreground = textDark;
+                TxtAboutAuthor.Foreground = textDark;
+
+                TxtArchiveHeader.Foreground = textDark;
+
+                // Меню
+                foreach (var child in ((Grid)LeftSidebar.Child).Children)
+                {
+                    if (child is StackPanel sp)
+                        foreach (var item in sp.Children)
+                            if (item is Button btn && btn.Style == FindResource("MenuButton")) btn.Foreground = Brushes.LightGray;
+                }
+
+                UpdateAllCardsColor(panelDark, textDark, Brushes.LightGray);
+            }
+            else
+            {
+                this.Background = new SolidColorBrush(Color.FromRgb(244, 245, 247));
+                LeftSidebar.Background = panelLight;
+                MainTabControl.Background = Brushes.Transparent;
+
+                // Панели
+                TopControlPanel.Background = panelLight;
+                ArchiveHeader.Background = panelLight;
+                SettingsBorder.Background = panelLight;
+                AboutBorder.Background = panelLight;
+                ProfileBorder.Background = panelLight;
+                StatBorder1.Background = panelLight;
+                StatBorder2.Background = panelLight;
+                StatBorder3.Background = panelLight;
+                ChartBorder.Background = panelLight;
+
+                // Текст
+                TxtProfileHeader.Foreground = textLight;
+                TxtProfileName.Foreground = textLight;
+                TxtUsername.Foreground = textLight;
+
+                TxtFilterLabel.Foreground = textLight;
+                CmbFilter.Foreground = textLight;
+                CmbFilter.Background = Brushes.White;
+
+                // Текст в Настройках и "О программе"
+                TxtSettingsTitle.Foreground = textLight;
+                ChkReminders.Foreground = textLight;
+                ChkDarkTheme.Foreground = textLight;
+                TxtExportTitle.Foreground = textLight;
+
+                TxtAboutTitle.Foreground = textLight;
+                TxtAboutDesc.Foreground = textLight;
+                TxtAboutAuthor.Foreground = textLight;
+
+                TxtArchiveHeader.Foreground = textLight;
+
+                foreach (var child in ((Grid)LeftSidebar.Child).Children)
+                {
+                    if (child is StackPanel sp)
+                        foreach (var item in sp.Children)
+                            if (item is Button btn && btn.Style == FindResource("MenuButton")) btn.Foreground = new SolidColorBrush(Color.FromRgb(85, 85, 85));
+                }
+
+                UpdateAllCardsColor(panelLight, new SolidColorBrush(Color.FromRgb(51, 51, 51)), Brushes.Gray);
+            }
+        }
+
+        // Метод покраски карточек
+        private void UpdateAllCardsColor(Brush cardBg, Brush titleFg, Brush infoFg)
+        {
+            var allCards = _activeHabitCards.Concat(_archivedHabitCards);
+            foreach (var card in allCards)
+            {
+                card.Background = cardBg;
+
+                if (card.Child is Grid g)
+                {
+                    foreach (var child in g.Children)
+                    {
+                        if (child is StackPanel textPanel)
+                        {
+                            foreach (var textChild in textPanel.Children)
+                            {
+                                if (textChild is TextBlock tb)
+                                {
+                                    if (tb.FontSize == 18) tb.Foreground = titleFg;
+                                    else if (tb.FontSize == 12) tb.Foreground = infoFg;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         // Навигация
@@ -80,13 +258,63 @@ namespace HabitTracker
             {
                 try
                 {
-                    BitmapImage bitmap = new BitmapImage(new Uri(openFileDialog.FileName));
+                    string sourceFile = openFileDialog.FileName;
+                    string extension = Path.GetExtension(sourceFile);
+
+                    string avatarsFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Avatars");
+                    if (!Directory.Exists(avatarsFolder))
+                        Directory.CreateDirectory(avatarsFolder);
+
+                    string newFileName = $"user_{_currentUserId}{extension}";
+                    string relativePath = Path.Combine("Avatars", newFileName);
+                    string fullDestPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, relativePath);
+
+                    // Отвязываем текущие картинки от интерфейса, чтобы файл освободился
+                    ImgProfileAvatar.Source = null;
+                    ImgAvatar.Source = null;
+
+                    // Удаляем старую аватарку
+                    if (!string.IsNullOrEmpty(_currentSettings.AvatarPath))
+                    {
+                        string oldFullPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, _currentSettings.AvatarPath);
+                        if (File.Exists(oldFullPath))
+                        {
+                            File.Delete(oldFullPath);
+                        }
+                    }
+
+                    File.Copy(sourceFile, fullDestPath, true);
+
+                    // Загружаем картинку через FileStream
+                    BitmapImage bitmap = new BitmapImage();
+                    using (FileStream stream = new FileStream(fullDestPath, FileMode.Open, FileAccess.Read))
+                    {
+                        bitmap.BeginInit();
+                        bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                        bitmap.StreamSource = stream;
+                        bitmap.EndInit();
+                    }
+                    bitmap.Freeze();
+
+                    // Устанавливаем новую картинку в интерфейс
                     ImgProfileAvatar.Source = bitmap;
                     ImgAvatar.Source = bitmap;
+
+                    // Сохраняем в БД
+                    using (var context = new AppDbContext())
+                    {
+                        var settings = context.UserSettings.FirstOrDefault(s => s.UserId == _currentUserId);
+                        if (settings != null)
+                        {
+                            settings.AvatarPath = relativePath;
+                            context.SaveChanges();
+                        }
+                    }
+                    _currentSettings.AvatarPath = relativePath;
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Ошибка загрузки: {ex.Message}");
+                    MessageBox.Show($"Ошибка при сохранении аватара: {ex.Message}");
                 }
             }
         }
@@ -101,87 +329,19 @@ namespace HabitTracker
         // Тёмная тема меню
         private void ChkDarkTheme_Click(object sender, RoutedEventArgs e)
         {
-            _isDarkTheme = ChkDarkTheme.IsChecked ?? false;
+            bool isDark = ChkDarkTheme.IsChecked ?? false;
 
-            Brush bgDark = new SolidColorBrush(Color.FromRgb(30, 30, 30));
-            Brush panelDark = new SolidColorBrush(Color.FromRgb(45, 45, 45));
-            Brush textDark = Brushes.White;
-            Brush textLight = Brushes.Black;
-            Brush panelLight = Brushes.White;
+            // Применение цветов
+            ApplyTheme(isDark);
 
-            if (_isDarkTheme)
+            // Сохранение в БД
+            using (var context = new AppDbContext())
             {
-                this.Background = bgDark;
-                LeftSidebar.Background = new SolidColorBrush(Color.FromRgb(20, 20, 20));
-                MainTabControl.Background = bgDark;
-
-                // Панели
-                TopControlPanel.Background = panelDark;
-                ArchiveHeader.Background = panelDark;
-                SettingsBorder.Background = panelDark;
-                AboutBorder.Background = panelDark;
-                ProfileBorder.Background = panelDark;
-                StatBorder1.Background = panelDark;
-                StatBorder2.Background = panelDark;
-                StatBorder3.Background = panelDark;
-                ChartBorder.Background = panelDark;
-
-                // Текст
-                TxtProfileHeader.Foreground = textDark;
-                TxtProfileName.Foreground = textDark;
-                TxtUsername.Foreground = textDark;
-
-                foreach (var child in ((Grid)LeftSidebar.Child).Children)
+                var settings = context.UserSettings.FirstOrDefault(s => s.UserId == _currentUserId);
+                if (settings != null)
                 {
-                    if (child is StackPanel sp)
-                        foreach (var item in sp.Children)
-                            if (item is Button btn && btn.Style == FindResource("MenuButton")) btn.Foreground = Brushes.LightGray;
-                }
-
-                UpdateAllCardsColor(panelDark, textDark, Brushes.LightGray);
-            }
-            else
-            {
-                this.Background = new SolidColorBrush(Color.FromRgb(244, 245, 247));
-                LeftSidebar.Background = panelLight;
-                MainTabControl.Background = Brushes.Transparent;
-
-                // Панели
-                TopControlPanel.Background = panelLight;
-                ArchiveHeader.Background = panelLight;
-                SettingsBorder.Background = panelLight;
-                AboutBorder.Background = panelLight;
-                ProfileBorder.Background = panelLight;
-                StatBorder1.Background = panelLight;
-                StatBorder2.Background = panelLight;
-                StatBorder3.Background = panelLight;
-                ChartBorder.Background = panelLight;
-
-                // Текст
-                TxtProfileHeader.Foreground = textLight;
-                TxtProfileName.Foreground = textLight;
-                TxtUsername.Foreground = textLight;
-
-                foreach (var child in ((Grid)LeftSidebar.Child).Children)
-                {
-                    if (child is StackPanel sp)
-                        foreach (var item in sp.Children)
-                            if (item is Button btn && btn.Style == FindResource("MenuButton")) btn.Foreground = new SolidColorBrush(Color.FromRgb(85, 85, 85));
-                }
-
-                UpdateAllCardsColor(panelLight, new SolidColorBrush(Color.FromRgb(51, 51, 51)), Brushes.Gray);
-            }
-        }
-
-        private void UpdateAllCardsColor(Brush cardBg, Brush titleFg, Brush infoFg)
-        {
-            foreach (var card in _activeHabitCards.Concat(_archivedHabitCards))
-            {
-                card.Background = cardBg;
-                if (card.Child is Grid g && g.Children[0] is StackPanel leftP && leftP.Children[1] is StackPanel textP)
-                {
-                    if (textP.Children[0] is TextBlock title) title.Foreground = titleFg;
-                    if (textP.Children[1] is TextBlock info) info.Foreground = infoFg;
+                    settings.Theme = isDark ? "Dark" : "Light";
+                    context.SaveChanges();
                 }
             }
         }
@@ -281,26 +441,37 @@ namespace HabitTracker
                 Padding = new Thickness(15, 8, 15, 8),
                 Margin = new Thickness(0, 0, 10, 0)
             };
+
+            bool isArchived = false;
+
             archiveBtn.Click += (s, ev) =>
             {
-                HabitsListPanel.Children.Remove(card);
-                _activeHabitCards.Remove(card);
-
-                archiveBtn.Content = "🔄 Восстановить";
-                archiveBtn.Background = new SolidColorBrush(Color.FromRgb(23, 162, 184));
-
-                archiveBtn.Click += (sender2, args2) =>
+                if (!isArchived)
                 {
+                    // ПЕРЕМЕЩАЕМ В АРХИВ
+                    HabitsListPanel.Children.Remove(card);
+                    _activeHabitCards.Remove(card);
+
+                    ArchivedListPanel.Children.Add(card);
+                    _archivedHabitCards.Add(card);
+
+                    archiveBtn.Content = "🔄 Восстановить";
+                    archiveBtn.Background = new SolidColorBrush(Color.FromRgb(23, 162, 184)); // Голубой
+                    isArchived = true;
+                }
+                else
+                {
+                    // ВОССТАНАВЛИВАЕМ ИЗ АРХИВА
                     ArchivedListPanel.Children.Remove(card);
                     _archivedHabitCards.Remove(card);
+
                     HabitsListPanel.Children.Add(card);
                     _activeHabitCards.Add(card);
-                    archiveBtn.Content = "📦 В архив";
-                    archiveBtn.Background = new SolidColorBrush(Color.FromRgb(255, 193, 7));
-                };
 
-                ArchivedListPanel.Children.Add(card);
-                _archivedHabitCards.Add(card);
+                    archiveBtn.Content = "📦 В архив";
+                    archiveBtn.Background = new SolidColorBrush(Color.FromRgb(255, 193, 7)); // Желтый
+                    isArchived = false;
+                }
             };
 
             // Кнопка Удалить

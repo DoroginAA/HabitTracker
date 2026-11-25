@@ -70,6 +70,9 @@ namespace HabitTracker.Models
         [Column("timezone")]
         public string? Timezone { get; set; }
 
+        [Column("avatar_path")]
+        public string? AvatarPath { get; set; }
+
         public User? User { get; set; }
     }
 

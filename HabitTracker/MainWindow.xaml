@@ -2,7 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Трекер привычек" Height="750" Width="1100" 
-        WindowStartupLocation="CenterScreen" Background="#f4f5f7">
+        WindowStartupLocation="CenterScreen" Background="#f4f5f7"
+        MinHeight="500" MinWidth="1000">
 
     <Window.Resources>
         <Style x:Key="MenuButton" TargetType="Button">
@@ -16,7 +17,24 @@
             <Setter Property="Cursor" Value="Hand"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#e2e6ea"/>
+                    <Setter Property="Background" Value="#33AAAAAA"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Стиль для выпадающих списков -->
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#0078D7"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#005A9E"/>
+                    <Setter Property="Foreground" Value="White"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -96,7 +114,7 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="Фильтр:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                <TextBlock x:Name="TxtFilterLabel" Text="Фильтр:" VerticalAlignment="Center" Margin="0,0,10,0"/>
                                 <ComboBox x:Name="CmbFilter" Width="150" Height="35" SelectionChanged="CmbFilter_SelectionChanged">
                                     <ComboBoxItem Content="Все" IsSelected="True"/>
                                     <ComboBoxItem Content="Полезные"/>
@@ -185,11 +203,11 @@
             <TabItem Header="Настройки">
                 <Border x:Name="SettingsBorder" Background="White" CornerRadius="8" Padding="20">
                     <StackPanel>
-                        <TextBlock Text="Настройки приложения" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
-                        <CheckBox Content="Включить напоминания" IsChecked="True" Margin="0,10"/>
+                        <TextBlock x:Name="TxtSettingsTitle" Text="Настройки приложения" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
+                        <CheckBox x:Name="ChkReminders" Content="Включить напоминания" IsChecked="True" Margin="0,10"/>
                         <CheckBox x:Name="ChkDarkTheme" Content="Темная тема" Margin="0,10" Click="ChkDarkTheme_Click"/>
 
-                        <TextBlock Text="Экспорт данных" FontSize="16" FontWeight="Bold" Margin="0,20,0,10"/>
+                        <TextBlock x:Name="TxtExportTitle" Text="Экспорт данных" FontSize="16" FontWeight="Bold" Margin="0,20,0,10"/>
                         <StackPanel Orientation="Horizontal">
                             <Button Content="Экспорт в CSV" Padding="15,5" Background="#0078D7" Foreground="White" BorderThickness="0" Click="BtnExport_Click" Tag="CSV"/>
                             <Button Content="Экспорт в PDF" Padding="15,5" Margin="10,0,0,0" Background="#0078D7" Foreground="White" BorderThickness="0" Click="BtnExport_Click" Tag="PDF"/>
@@ -207,7 +225,7 @@
                     </Grid.RowDefinitions>
 
                     <Border Grid.Row="0" Background="White" CornerRadius="8" Padding="15" Margin="0,0,0,15" x:Name="ArchiveHeader">
-                        <TextBlock Text="Архив привычек (неактивные)" FontSize="18" FontWeight="Bold"/>
+                        <TextBlock x:Name="TxtArchiveHeader" Text="Архив привычек (неактивные)" FontSize="18" FontWeight="Bold"/>
                     </Border>
 
                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
@@ -220,9 +238,9 @@
             <TabItem Header="О программе">
                 <Border x:Name="AboutBorder" Background="White" CornerRadius="8" Padding="20">
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <TextBlock Text="Курсовой проект" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"/>
-                        <TextBlock Text="Тема: Разработка приложения для учёта и анализа личных привычек" FontSize="16" Margin="0,10" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="400"/>
-                        <TextBlock Text="Выполнил: Дорогин" Margin="0,20,0,0" HorizontalAlignment="Center"/>
+                        <TextBlock x:Name="TxtAboutTitle" Text="Курсовой проект" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <TextBlock x:Name="TxtAboutDesc" Text="Тема: Разработка приложения для учёта и анализа личных привычек" FontSize="16" Margin="0,10" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="400"/>
+                        <TextBlock x:Name="TxtAboutAuthor" Text="Выполнил: Дорогин" Margin="0,20,0,0" HorizontalAlignment="Center"/>
                     </StackPanel>
                 </Border>
             </TabItem>
