@@ -3,7 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Трекер привычек" Height="750" Width="1100" 
         WindowStartupLocation="CenterScreen" Background="#f4f5f7"
-        MinHeight="500" MinWidth="1000">
+        MinHeight="500" MinWidth="1000"
+        Closing="Window_Closing">
 
     <Window.Resources>
         <Style x:Key="MenuButton" TargetType="Button">
@@ -204,10 +205,47 @@
                 <Border x:Name="SettingsBorder" Background="White" CornerRadius="8" Padding="20">
                     <StackPanel>
                         <TextBlock x:Name="TxtSettingsTitle" Text="Настройки приложения" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
-                        <CheckBox x:Name="ChkReminders" Content="Включить напоминания" IsChecked="True" Margin="0,10"/>
+
+                        <!-- Уведомления -->
+                        <CheckBox x:Name="ChkReminders" Content="Включить напоминания" IsChecked="True" Margin="0,10" Click="SaveSettings_Click"/>
                         <CheckBox x:Name="ChkDarkTheme" Content="Темная тема" Margin="0,10" Click="ChkDarkTheme_Click"/>
 
-                        <TextBlock x:Name="TxtExportTitle" Text="Экспорт данных" FontSize="16" FontWeight="Bold" Margin="0,20,0,10"/>
+                        <!-- Язык и Часовой пояс -->
+                        <Grid Margin="0,15,0,15">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="15"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock x:Name="TxtLangLabel" Text="Язык интерфейса:" Margin="0,0,0,5"/>
+                                <ComboBox x:Name="CmbLanguage" Height="30" SelectionChanged="SaveSettings_Click">
+                                    <ComboBoxItem Content="Русский" Tag="ru" IsSelected="True"/>
+                                    <ComboBoxItem Content="English" Tag="en"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2">
+                                <TextBlock x:Name="TxtTzLabel" Text="Часовой пояс:" Margin="0,0,0,5"/>
+                                <ComboBox x:Name="CmbTimezone" Height="30" SelectionChanged="SaveSettings_Click">
+                                    <ComboBoxItem Content="UTC+3 (Москва)" Tag="UTC+3" IsSelected="True"/>
+                                    <ComboBoxItem Content="UTC+0 (Лондон)" Tag="UTC+0"/>
+                                    <ComboBoxItem Content="UTC+5 (Екатеринбург)" Tag="UTC+5"/>
+                                </ComboBox>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Начало недели -->
+                        <StackPanel Margin="0,0,0,20">
+                            <TextBlock x:Name="TxtWeekLabel" Text="Начало недели:" Margin="0,0,0,5"/>
+                            <ComboBox x:Name="CmbStartOfWeek" Height="30" SelectionChanged="SaveSettings_Click">
+                                <ComboBoxItem Content="Понедельник" Tag="1" IsSelected="True"/>
+                                <ComboBoxItem Content="Воскресенье" Tag="0"/>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <TextBlock x:Name="TxtExportTitle" Text="Экспорт данных" FontSize="16" FontWeight="Bold" Margin="0,10,0,10"/>
                         <StackPanel Orientation="Horizontal">
                             <Button Content="Экспорт в CSV" Padding="15,5" Background="#0078D7" Foreground="White" BorderThickness="0" Click="BtnExport_Click" Tag="CSV"/>
                             <Button Content="Экспорт в PDF" Padding="15,5" Margin="10,0,0,0" Background="#0078D7" Foreground="White" BorderThickness="0" Click="BtnExport_Click" Tag="PDF"/>
@@ -262,6 +300,7 @@
 
                         <TextBlock x:Name="TxtProfileName" Text="Имя пользователя" FontSize="20" Margin="0,0,0,10"/>
                         <TextBlock x:Name="TxtProfileEmail" Text="Email:" FontSize="14" Foreground="Gray" Margin="0,0,0,30"/>
+                        <TextBlock x:Name="TxtProfileStatus" Text="Статус: В сети" FontSize="14" Foreground="#28a745" FontWeight="Bold" Margin="0,0,0,30"/>
 
                         <Button Content="Изменить аватар" Width="200" Height="40" Background="#0078D7" Foreground="White" BorderThickness="0" Click="BtnChangeAvatar_Click"/>
                     </StackPanel>

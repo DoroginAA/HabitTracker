@@ -1,18 +1,23 @@
-﻿using System;
-using System.Windows;
-using HabitTracker.Data;
+﻿using HabitTracker.Data;
+using HabitTracker.Factories;
 using HabitTracker.Models;
+using HabitTracker.Repositories;
+using HabitTracker.Services;
 using HabitTracker.Views;
+using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Windows;
 
 namespace HabitTracker
 {
     public partial class App : Application
     {
+        public static ServiceProvider ServiceProvider { get; private set; }
+
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
-            // Создаем базу данных и справочники
             try
             {
                 using (var context = new AppDbContext())
@@ -41,6 +46,19 @@ namespace HabitTracker
                 Shutdown();
                 return;
             }
+
+            var serviceCollection = new ServiceCollection();
+
+            // Регистрируем зависимости
+            serviceCollection.AddTransient<IHabitRepository, HabitRepository>();
+            serviceCollection.AddTransient<IHabitFactory, HabitFactory>();
+            serviceCollection.AddTransient<HabitService>();
+
+            ServiceProvider = serviceCollection.BuildServiceProvider();
+
+            // Запускаем окно логина
+            var loginWindow = new LoginWindow();
+            loginWindow.Show();
         }
     }
 }
